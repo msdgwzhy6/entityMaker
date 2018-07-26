@@ -1,6 +1,8 @@
 package top.hejiaxuan.util.maker;
 
 import com.mysql.jdbc.Connection;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import top.hejiaxuan.util.FileUtils;
 import top.hejiaxuan.util.FreeMarkerUtils;
 import top.hejiaxuan.util.NameConvert;
@@ -8,12 +10,22 @@ import top.hejiaxuan.util.jdbc.annotation.Column;
 import top.hejiaxuan.util.jdbc.annotation.Table;
 import top.hejiaxuan.util.model.EntityModel;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.text.Format;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 数据库表生成entity工具
@@ -25,6 +37,8 @@ public class EntityMaker {
     static final String FILE_TYPE = ".java";
 
     static final String ENTITY_TEMPLET_PATH = "EntityTemp.ftl";
+
+    static final String CONFIG_PATH = "config.xml";
 
     /**
      * 数据库连接
@@ -51,12 +65,21 @@ public class EntityMaker {
      */
     private NameConvert nameConvert;
 
-    public void maker() {
-        List<EntityModel> classModels = readDatabases();
-        for (EntityModel classModel : classModels) {
-            makeOneClass(classModel);
+    /**
+     * 读取数据库信息
+     */
+    void maker() throws SQLException {
+        List<EntityModel> classModels = new ArrayList<>();
+        DatabaseMetaData metaData = connection.getMetaData();
+        final ResultSet dataTables = metaData.getTables(null, "%", "%", new String[]{"TABLE"});
+        while (dataTables.next()) {
+            String tableName = dataTables.getString("TABLE_NAME");
+            String remarks = dataTables.getString("REMARKS");
+            ResultSet columns = metaData.getColumns(null, "%", tableName, "%");
+            EntityModel model = makeModel(tableName, remarks, columns);
+            boolean b = makeOneClass(model);
+            System.out.printf("Result: %-5s entity: %-40s\n", b, model.getClassName());
         }
-        System.out.println("SUCCESS :" + classModels.size() + " files.");
     }
 
     /**
@@ -79,28 +102,6 @@ public class EntityMaker {
     }
 
     /**
-     * 读取数据库信息
-     */
-    List<EntityModel> readDatabases() {
-        List<EntityModel> classModels = new ArrayList<>();
-        try {
-            DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet dataTables = metaData.getTables(null, "%", "%", new String[]{"TABLE"});
-            while (dataTables.next()) {
-                String tableName = dataTables.getString("TABLE_NAME");
-                String remarks = dataTables.getString("REMARKS");
-                ResultSet columns = metaData.getColumns(null, "%", tableName, "%");
-                EntityModel model = makeModel(tableName, remarks, columns);
-                classModels.add(model);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return classModels;
-    }
-
-    /**
      * @param tableName
      * @param classRemarks
      * @param resultSet
@@ -113,9 +114,14 @@ public class EntityMaker {
                 String columnName = resultSet.getString("COLUMN_NAME");
                 String columnType = resultSet.getString("TYPE_NAME");
                 String remarks = resultSet.getString("REMARKS");
-                System.out.printf("columnName:%-20s columnType:%-20s \n", columnName, columnType);
+//                System.out.printf("columnName:%-20s columnType:%-20s \n", columnName, columnType);
                 String fieldName = nameConvert.fieldName(columnName);
                 Class fieldClass = sqlFieldTypeMapping.get(columnType);
+                if (fieldClass == null) {
+                    Formatter formatter = new Formatter();
+                    formatter.format("table:%s columnName:%s sql类型:%s 没有映射类型", tableName, columnName, columnType);
+                    throw new UnsupportedOperationException(formatter.toString());
+                }
                 model.addfield(fieldName, fieldClass);
                 model.addfieldDoc(columnName, remarks);
                 model.addfieldSqlName(fieldName, columnName);
@@ -133,30 +139,44 @@ public class EntityMaker {
     }
 
     public EntityMaker() {
+        Document configXml = getConfigXml();
+        Element element = configXml.getDocumentElement();
+        String jdbcUrl = element.getElementsByTagName("jdbc.url").item(0).getTextContent();
+        String username = element.getElementsByTagName("jdbc.username").item(0).getTextContent();
+        String password = element.getElementsByTagName("jdbc.password").item(0).getTextContent();
+        String basePath = element.getElementsByTagName("basePath").item(0).getTextContent();
+        String entityPackage = element.getElementsByTagName("entityPackage").item(0).getTextContent();
+
+        try {
+            Connection conn = (Connection) DriverManager.getConnection(jdbcUrl, username, password);
+            this.connection = conn;
+            this.basePath = basePath;
+            this.entityClassPackage = entityPackage;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    Document getConfigXml() {
+        try {
+            InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(CONFIG_PATH);
+            Scanner scanner = new Scanner(resourceAsStream);
+            StringBuilder stringBuilder = new StringBuilder();
+            while (scanner.hasNextLine()) {
+                stringBuilder.append(scanner.nextLine()).append("\n");
+            }
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilde = documentBuilderFactory.newDocumentBuilder();
+            Document document = documentBuilde.parse(new ByteArrayInputStream(stringBuilder.toString().getBytes()));
+            return document;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public void setSqlFieldTypeMapping(Map<String, Class> sqlFieldTypeMapping) {
         this.sqlFieldTypeMapping = sqlFieldTypeMapping;
-    }
-
-    public EntityMaker(String entityClassPackage) {
-        this.entityClassPackage = entityClassPackage;
-    }
-
-    public void setEntityClassPackage(String entityClassPackage) {
-        this.entityClassPackage = entityClassPackage;
-    }
-
-    public void setBasePath(String basePath) {
-        this.basePath = basePath;
-    }
-
-    public NameConvert getNameConvert() {
-        return nameConvert;
     }
 
     public void setNameConvert(NameConvert nameConvert) {

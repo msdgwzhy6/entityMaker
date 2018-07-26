@@ -6,17 +6,21 @@ package top.hejiaxuan.util;
 public class NameConvert {
 
     public String entityName(String name) {
+        name = name.toLowerCase();
         StringBuilder newName = new StringBuilder();
         char[] chars = name.toCharArray();
         boolean change = false;
         for (int i = 0; i < chars.length; i++) {
             char aChar = chars[i];
-            if (i == 0) {
-                continue;
-            } else if (aChar == '_' && !change) {
+            if (aChar == '_' && !change) {
                 change = true;
                 continue;
-            } else if (change) {
+            }
+            if (i == 0) {
+                aChar = Character.toUpperCase(aChar);
+//                continue;
+            }
+            if (change) {
                 aChar = Character.toUpperCase(aChar);
                 change = false;
             }
@@ -26,6 +30,7 @@ public class NameConvert {
     }
 
     public String fieldName(String name) {
+        name = name.toLowerCase();
         StringBuilder newName = new StringBuilder();
         char[] chars = name.toCharArray();
         boolean change = false;
@@ -34,7 +39,8 @@ public class NameConvert {
             if (aChar == '_' && !change) {
                 change = true;
                 continue;
-            } else if (change) {
+            }
+            if (change) {
                 aChar = Character.toUpperCase(aChar);
                 change = false;
             }

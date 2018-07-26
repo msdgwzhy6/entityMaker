@@ -27,7 +27,7 @@ public class ${className} {
 <#list fields?keys as key>
     <#assign  fieldClass = fields[key].simpleName>
 <#--setter-->
-    public void <#if fieldClass="boolean">is<#else>set</#if>${key?cap_first}(${fieldClass} ${key}){
+    public void set${key?cap_first}(${fieldClass} ${key}){
         this.${key} = ${key};
     }
 
@@ -39,7 +39,7 @@ public class ${className} {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("{");
+        final StringBuilder sb = new StringBuilder();
 <#list fields?keys as key>
         sb.append("${key}:").append(${key}).append(";");
 </#list>

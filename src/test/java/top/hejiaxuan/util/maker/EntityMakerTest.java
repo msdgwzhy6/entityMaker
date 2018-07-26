@@ -1,10 +1,9 @@
 package top.hejiaxuan.util.maker;
 
-import com.mysql.jdbc.Connection;
 import org.junit.Test;
 import top.hejiaxuan.util.NameConvert;
 
-import java.sql.DriverManager;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,30 +14,38 @@ public class EntityMakerTest {
     EntityMaker entityMaker = new EntityMaker();
 
     {
-        try {
-            Connection conn = (Connection) DriverManager.getConnection("jdbc:mysql://{ip}:{port}/pay?user={username}&password={password}&useSSL=true");
+        Map<String, Class> sqlFieldTypeMapping = new HashMap<>();
+        sqlFieldTypeMapping.put("VARCHAR", String.class);
+        sqlFieldTypeMapping.put("CHAR", String.class);
+        sqlFieldTypeMapping.put("TEXT", String.class);
+        sqlFieldTypeMapping.put("MEDIUMTEXT", String.class);
+        sqlFieldTypeMapping.put("LONGTEXT", String.class);
+        sqlFieldTypeMapping.put("TINYTEXT", String.class);
 
-            Map<String, Class> sqlFieldTypeMapping = new HashMap<>();
-            sqlFieldTypeMapping.put("INT", int.class);
-            sqlFieldTypeMapping.put("VARCHAR", String.class);
-            sqlFieldTypeMapping.put("DATETIME", Date.class);
-            sqlFieldTypeMapping.put("FLOAT", float.class);
-            sqlFieldTypeMapping.put("DOUBLE", double.class);
-            sqlFieldTypeMapping.put("TINYINT", int.class);
+        sqlFieldTypeMapping.put("BIT", Boolean.class);
 
-            entityMaker.setEntityClassPackage("top.hejiaxuan");
-            entityMaker.setConnection(conn);
-            entityMaker.setSqlFieldTypeMapping(sqlFieldTypeMapping);
-            entityMaker.setBasePath("/home/hjx/Class");
-            entityMaker.setNameConvert(new NameConvert());
+        sqlFieldTypeMapping.put("INT", int.class);
+        sqlFieldTypeMapping.put("BIGINT", long.class);
+        sqlFieldTypeMapping.put("DOUBLE", double.class);
+        sqlFieldTypeMapping.put("TINYINT", int.class);
+        sqlFieldTypeMapping.put("FLOAT", float.class);
+        sqlFieldTypeMapping.put("DECIMAL", BigDecimal.class);
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        sqlFieldTypeMapping.put("INT UNSIGNED", int.class);
+        sqlFieldTypeMapping.put("BIGINT UNSIGNED", int.class);
+        sqlFieldTypeMapping.put("DECIMAL UNSIGNED", BigDecimal.class);
+
+        sqlFieldTypeMapping.put("DATETIME", Date.class);
+        sqlFieldTypeMapping.put("TIME", Date.class);
+        sqlFieldTypeMapping.put("DATE", Date.class);
+        sqlFieldTypeMapping.put("TIMESTAMP", Date.class);
+
+        entityMaker.setSqlFieldTypeMapping(sqlFieldTypeMapping);
+        entityMaker.setNameConvert(new NameConvert());
     }
 
     @Test
-    public void name() {
+    public void maker() throws SQLException {
         entityMaker.maker();
     }
 
