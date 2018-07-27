@@ -20,6 +20,9 @@ public class ${className} {
     <#if fieldDocStr?length gt 0>
     /**${fieldDocStr}*/
     </#if>
+    <#if idColumnNames?seq_contains(fieldSqlName[key])>
+    @ID
+    </#if>
     @Column(value="${fieldSqlName[key]}")
     private ${fields[key].simpleName} ${key};
 
@@ -39,10 +42,11 @@ public class ${className} {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder("[");
 <#list fields?keys as key>
-        sb.append("${key}:").append(${key}).append(";");
+        sb.append("${key}:").append(${key}).append(";    ");
 </#list>
+        sb.append("]");
         return sb.toString();
     }
 }

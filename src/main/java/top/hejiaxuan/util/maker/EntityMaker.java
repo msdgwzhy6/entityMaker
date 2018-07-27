@@ -7,6 +7,7 @@ import top.hejiaxuan.util.FileUtils;
 import top.hejiaxuan.util.FreeMarkerUtils;
 import top.hejiaxuan.util.NameConvert;
 import top.hejiaxuan.util.jdbc.annotation.Column;
+import top.hejiaxuan.util.jdbc.annotation.ID;
 import top.hejiaxuan.util.jdbc.annotation.Table;
 import top.hejiaxuan.util.model.EntityModel;
 
@@ -66,10 +67,15 @@ public class EntityMaker {
         DatabaseMetaData metaData = connection.getMetaData();
         final ResultSet dataTables = metaData.getTables(null, "%", "%", new String[]{"TABLE"});
         while (dataTables.next()) {
+            //表明
             String tableName = dataTables.getString("TABLE_NAME");
+            //表注释
             String remarks = dataTables.getString("REMARKS");
-            ResultSet columns = metaData.getColumns(null, "%", tableName, "%");
-            EntityModel model = makeModel(tableName, remarks, columns);
+            //表字段
+            ResultSet dataColumns = metaData.getColumns(null, "%", tableName, "%");
+            //表主键
+            ResultSet primaryKeys = metaData.getPrimaryKeys(null, null, tableName);
+            EntityModel model = makeModel(tableName, remarks, dataColumns, primaryKeys);
             boolean b = makeOneClass(model);
             System.out.printf("Result: %-5s entity: %-40s\n", b, model.getClassName());
         }
@@ -97,16 +103,17 @@ public class EntityMaker {
     /**
      * @param tableName
      * @param classRemarks
-     * @param resultSet
+     * @param dataColumns
+     * @param dataColumns
      * @return
      */
-    EntityModel makeModel(String tableName, String classRemarks, ResultSet resultSet) {
+    EntityModel makeModel(String tableName, String classRemarks, ResultSet dataColumns, ResultSet primaryKeys) {
         try {
             EntityModel model = new EntityModel();
-            while (resultSet.next()) {
-                String columnName = resultSet.getString("COLUMN_NAME");
-                String columnType = resultSet.getString("TYPE_NAME");
-                String remarks = resultSet.getString("REMARKS");
+            while (dataColumns.next()) {
+                String columnName = dataColumns.getString("COLUMN_NAME");
+                String columnType = dataColumns.getString("TYPE_NAME");
+                String remarks = dataColumns.getString("REMARKS");
                 //System.out.printf("columnName:%-20s columnType:%-20s \n", columnName, columnType);
                 String fieldName = nameConvert.fieldName(columnName);
                 Class fieldClass = columnFieldTypeMapping.getFieldType(columnType);
@@ -120,10 +127,16 @@ public class EntityMaker {
                 model.addfieldSqlName(fieldName, columnName);
                 model.addImport(fieldClass);
             }
+            while (primaryKeys.next()) {
+                String idColumnName = primaryKeys.getString("COLUMN_NAME");
+                model.addIdColumnName(idColumnName);
+                model.addImport(ID.class);
+            }
             model.addImport(Column.class);
             model.addImport(Table.class);
             model.setClassName(nameConvert.entityName(tableName));
             model.setTableName(tableName);
+            model.setClassDoc(classRemarks);
             return model;
         } catch (SQLException e) {
             e.printStackTrace();

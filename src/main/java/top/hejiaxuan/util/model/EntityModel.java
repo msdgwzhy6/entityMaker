@@ -1,6 +1,8 @@
 package top.hejiaxuan.util.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,6 +14,11 @@ public class EntityModel extends ClassModel {
      * 数据库名称
      */
     private String tableName;
+
+    /**
+     * 数据库中的Id字段名称
+     */
+    private List<String> idColumnNames = new ArrayList<>();
 
     /**
      * 类属性名对应数据库字段映射
@@ -32,6 +39,15 @@ public class EntityModel extends ClassModel {
         }
     }
 
+    /**
+     * 添加id字段名
+     *
+     * @param idColumnName
+     */
+    public void addIdColumnName(String idColumnName) {
+        idColumnNames.add(idColumnName);
+    }
+
     public String getTableName() {
         return tableName;
     }
@@ -46,5 +62,13 @@ public class EntityModel extends ClassModel {
 
     public void setFieldSqlName(Map<String, String> fieldSqlName) {
         this.fieldSqlName = fieldSqlName;
+    }
+
+    public List<String> getIdColumnNames() {
+        return idColumnNames;
+    }
+
+    public void setIdColumnNames(List<String> idColumnNames) {
+        this.idColumnNames = idColumnNames;
     }
 }
