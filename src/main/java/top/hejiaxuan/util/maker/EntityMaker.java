@@ -13,19 +13,12 @@ import top.hejiaxuan.util.model.EntityModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.Format;
-import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 数据库表生成entity工具
@@ -48,7 +41,7 @@ public class EntityMaker {
     /**
      * 数据库字段类型对应java属性类型映射
      */
-    private Map<String, Class> sqlFieldTypeMapping;
+    private ColumnFieldTypeMapping columnFieldTypeMapping;
 
     /**
      * 生成的class包名
@@ -114,9 +107,9 @@ public class EntityMaker {
                 String columnName = resultSet.getString("COLUMN_NAME");
                 String columnType = resultSet.getString("TYPE_NAME");
                 String remarks = resultSet.getString("REMARKS");
-//                System.out.printf("columnName:%-20s columnType:%-20s \n", columnName, columnType);
+                //System.out.printf("columnName:%-20s columnType:%-20s \n", columnName, columnType);
                 String fieldName = nameConvert.fieldName(columnName);
-                Class fieldClass = sqlFieldTypeMapping.get(columnType);
+                Class fieldClass = columnFieldTypeMapping.getFieldType(columnType);
                 if (fieldClass == null) {
                     Formatter formatter = new Formatter();
                     formatter.format("table:%s columnName:%s sql类型:%s 没有映射类型", tableName, columnName, columnType);
@@ -175,8 +168,8 @@ public class EntityMaker {
         }
     }
 
-    public void setSqlFieldTypeMapping(Map<String, Class> sqlFieldTypeMapping) {
-        this.sqlFieldTypeMapping = sqlFieldTypeMapping;
+    public void setColumnFieldTypeMapping(ColumnFieldTypeMapping columnFieldTypeMapping) {
+        this.columnFieldTypeMapping = columnFieldTypeMapping;
     }
 
     public void setNameConvert(NameConvert nameConvert) {

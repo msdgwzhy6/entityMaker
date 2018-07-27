@@ -2,6 +2,7 @@
     <jdbc.url>jdbc:mysql://127.0.0.1:3306/demo?useSSL=true</jdbc.url>
     <jdbc.username>root</jdbc.username>
     <jdbc.password>00000</jdbc.password>
-    <basePath>/home/hjx/work/simpleDao/src/test/java</basePath>
+    <basePath>/home/hjx/work/PubmiDataOpt/src/main/java</basePath>
     <entityPackage>top.hejiaxuan.entity</entityPackage>
+
 </xml>
