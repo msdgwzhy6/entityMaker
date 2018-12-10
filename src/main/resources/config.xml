@@ -1,8 +1,7 @@
 <xml>
     <jdbc.url>jdbc:mysql://127.0.0.1:3306/demo?useSSL=true</jdbc.url>
-    <jdbc.username>root</jdbc.username>
-    <jdbc.password>00000</jdbc.password>
-    <basePath>/home/hjx/work/PubmiDataOpt/src/main/java</basePath>
-    <entityPackage>top.hejiaxuan.entity</entityPackage>
-
+    <jdbc.username>debian-sys-maint</jdbc.username>
+    <jdbc.password>cDjhZo5Tdul66r8E</jdbc.password>
+    <basePath>/home/hjx/work/myProject/simpleDao/src/test/java</basePath>
+    <entityPackage>com.github.hjx601496320.simpledao</entityPackage>
 </xml>

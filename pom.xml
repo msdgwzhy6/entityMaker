@@ -29,9 +29,9 @@
         </dependency>
 
         <dependency>
-            <groupId>top.hejiaxuan.util</groupId>
-            <artifactId>simple-dao</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>com.github.hjx601496320</groupId>
+            <artifactId>jdbcplus</artifactId>
+            <version>1.0-RELEASE</version>
         </dependency>
 
         <dependency>
