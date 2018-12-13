@@ -36,7 +36,11 @@ public class ColumnFieldTypeMapping {
     }
 
     public Class getFieldType(String columnType) {
-        return sqlFieldTypeMapping.get(columnType);
+        Class aClass = sqlFieldTypeMapping.get(columnType);
+        if (aClass == null) {
+            return sqlFieldTypeMapping.get(columnType.toUpperCase());
+        }
+        return null;
     }
 
 }

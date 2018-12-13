@@ -1,4 +1,4 @@
-package top.hejiaxuan;
+package top.hejiaxuan.util;
 
 import freemarker.cache.*;
 import freemarker.template.Configuration;

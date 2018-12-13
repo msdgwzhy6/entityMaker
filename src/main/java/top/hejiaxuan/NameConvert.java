@@ -5,6 +5,12 @@ package top.hejiaxuan;
  */
 public class NameConvert {
 
+    /**
+     * 类名称转换
+     *
+     * @param name
+     * @return
+     */
     public String entityName(String name) {
         name = name.toLowerCase();
         StringBuilder newName = new StringBuilder();
@@ -16,9 +22,9 @@ public class NameConvert {
                 change = true;
                 continue;
             }
+            //首字母大写
             if (i == 0) {
                 aChar = Character.toUpperCase(aChar);
-//                continue;
             }
             if (change) {
                 aChar = Character.toUpperCase(aChar);
@@ -29,6 +35,12 @@ public class NameConvert {
         return newName.toString();
     }
 
+    /**
+     * 属性名称转换
+     *
+     * @param name
+     * @return
+     */
     public String fieldName(String name) {
         name = name.toLowerCase();
         StringBuilder newName = new StringBuilder();
