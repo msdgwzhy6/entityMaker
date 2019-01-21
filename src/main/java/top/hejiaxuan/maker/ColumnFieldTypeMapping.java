@@ -17,24 +17,27 @@ public class ColumnFieldTypeMapping {
         sqlFieldTypeMapping.put("LONGTEXT", String.class);
         sqlFieldTypeMapping.put("TINYTEXT", String.class);
         sqlFieldTypeMapping.put("BIT", Boolean.class);
-
         sqlFieldTypeMapping.put("INT", int.class);
         sqlFieldTypeMapping.put("BIGINT", long.class);
         sqlFieldTypeMapping.put("DOUBLE", double.class);
         sqlFieldTypeMapping.put("TINYINT", int.class);
         sqlFieldTypeMapping.put("FLOAT", float.class);
         sqlFieldTypeMapping.put("DECIMAL", BigDecimal.class);
-
         sqlFieldTypeMapping.put("INT UNSIGNED", int.class);
         sqlFieldTypeMapping.put("BIGINT UNSIGNED", int.class);
         sqlFieldTypeMapping.put("DECIMAL UNSIGNED", BigDecimal.class);
-
         sqlFieldTypeMapping.put("DATETIME", Date.class);
         sqlFieldTypeMapping.put("TIME", Date.class);
         sqlFieldTypeMapping.put("DATE", Date.class);
         sqlFieldTypeMapping.put("TIMESTAMP", Date.class);
     }
 
+    /**
+     * 根据sql数据类型获取Java数据类型
+     *
+     * @param columnType
+     * @return
+     */
     public Class getFieldType(String columnType) {
         Class aClass = sqlFieldTypeMapping.get(columnType);
         if (aClass == null) {

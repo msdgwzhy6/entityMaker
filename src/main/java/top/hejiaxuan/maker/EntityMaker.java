@@ -10,19 +10,19 @@ import top.hejiaxuan.model.EntityModel;
 import top.hejiaxuan.util.FileUtils;
 import top.hejiaxuan.util.FreeMarkerUtils;
 import top.hejiaxuan.util.SqlUtils;
+import top.hejiaxuan.util.XmlUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Formatter;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 数据库表生成entity工具
@@ -50,17 +50,13 @@ public class EntityMaker {
     /**
      * 生成的class包名
      */
-    private String entityClassPackage;
+    private String entityPackage;
 
     /**
      * 生成的文件基础路径
      */
     private String basePath;
 
-    /**
-     * 数据库字段转换器
-     */
-    private NameConvert nameConvert;
 
     /**
      * 生成entity
@@ -69,12 +65,12 @@ public class EntityMaker {
         List<String> tableNames = showTables();
         for (String tableName : tableNames) {
             String createTableSql = getCreateTableSql(tableName);
-            EntityModel entityModel = makeModelBySql(tableName, createTableSql);
-
-            //添加其他的导入class
-            entityModel.addImport(ApiModel.class);
-            entityModel.addImport(ApiModelProperty.class);
-
+            EntityModel entityModel = makeModelBySql(createTableSql);
+//            entityModel.addImport(ApiModel.class);
+//            entityModel.addImport(ApiModelProperty.class);
+            entityModel.addImport(Table.class);
+            entityModel.addImport(Column.class);
+            entityModel.addImport(Id.class);
             boolean b = makeOneClass(entityModel);
             System.out.printf("创建class：%-20s %-20s  %s \n", entityModel.getClassDoc(), tableName, b);
             Map<String, Class> fields = entityModel.getFields();
@@ -85,37 +81,28 @@ public class EntityMaker {
     }
 
     /**
-     * @param tableName
+     * 根据建表语句组装EntityModel
+     *
      * @param createTableSql
      * @return
      */
-    EntityModel makeModelBySql(String tableName, String createTableSql) {
+    EntityModel makeModelBySql(String createTableSql) {
         Formatter formatter = new Formatter();
         EntityModel model = new EntityModel();
-        List<String> line = SqlUtils.byLine(createTableSql);
-        model.setClassName(nameConvert.entityName(tableName));
+        String tableComment = SqlUtils.getTableComment(createTableSql);
+        String tableName = SqlUtils.getTableName(createTableSql);
+        String id = SqlUtils.getId(createTableSql);
+        model.addIdColumnName(id);
+        model.setClassName(NameConvert.entityName(tableName));
         model.setTableName(tableName);
-        model.addImport(Table.class);
-        model.addImport(Column.class);
-        String tableComment = SqlUtils.getTableComment(line.get(line.size() - 1));
         //注释是null的时候用数据库表名作为注释
         model.setClassDoc(tableComment == null ? tableName : tableComment);
-
-        //解析数据库字段名，字段类型，字段注释
-        //从第1行开始解析,解析到倒数第2行
-        for (int i = 1; i < line.size(); i++) {
-            String oneLine = line.get(i);
-            String columnName = SqlUtils.getColumnName(oneLine);
-            String comment = SqlUtils.getComment(oneLine);
-            String columnType = SqlUtils.getColumnType(columnName, oneLine);
-            String id = SqlUtils.getId(oneLine);
-            //如果到了id 的一行 或者 没有找到有效字段，跳出循环
-            if (id != null || columnName == null) {
-                model.addIdColumnName(id);
-                model.addImport(Id.class);
-                break;
-            }
-            String fieldName = nameConvert.fieldName(columnName);
+        List<String> line = SqlUtils.getColumnSqls(createTableSql);
+        for (String oneLine : line) {
+            String columnName = SqlUtils.getByPattern(oneLine, "`(.*)`", 1);
+            String comment = SqlUtils.getByPattern(oneLine, "COMMENT '(.*)'", 1);
+            String columnType = SqlUtils.getByPattern(oneLine, "`" + columnName + "` ([A-Za-z]*)", 1);
+            String fieldName = NameConvert.fieldName(columnName);
             Class fieldClass = columnFieldTypeMapping.getFieldType(columnType);
             if (fieldClass == null) {
                 formatter.format("table:%s columnName:%s sql类型:%s 没有映射类型", tableName, columnName, columnType);
@@ -178,14 +165,14 @@ public class EntityMaker {
     /**
      * 用于生成一个类文件
      *
-     * @param model
+     * @param entityModel
      * @return
      */
-    boolean makeOneClass(EntityModel model) {
-        model.setPackageName(entityClassPackage);
-        String filePath = basePath + "/" + entityClassPackage.replace(DOT, "/") + "/" + model.getClassName() + FILE_TYPE;
+    boolean makeOneClass(EntityModel entityModel) {
+        entityModel.setPackageName(entityPackage);
+        String filePath = basePath + "/" + entityPackage.replace(DOT, "/") + "/" + entityModel.getClassName() + FILE_TYPE;
         try {
-            String javaClassString = FreeMarkerUtils.getJavaClass(model, ENTITY_TEMPLET_PATH);
+            String javaClassString = FreeMarkerUtils.getJavaClass(entityModel, ENTITY_TEMPLET_PATH);
             FileUtils.write(filePath, javaClassString);
             return true;
         } catch (Exception e) {
@@ -195,7 +182,7 @@ public class EntityMaker {
     }
 
     public EntityMaker() {
-        Document configXml = getConfigXml();
+        Document configXml = XmlUtils.getConfigDocument(CONFIG_PATH);
         Element element = configXml.getDocumentElement();
         String jdbcUrl = element.getElementsByTagName("jdbc.url").item(0).getTextContent();
         String username = element.getElementsByTagName("jdbc.username").item(0).getTextContent();
@@ -206,35 +193,15 @@ public class EntityMaker {
             Connection conn = (Connection) DriverManager.getConnection(jdbcUrl, username, password);
             this.connection = conn;
             this.basePath = basePath;
-            this.entityClassPackage = entityPackage;
+            this.entityPackage = entityPackage;
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    Document getConfigXml() {
-        try {
-            InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(CONFIG_PATH);
-            Scanner scanner = new Scanner(resourceAsStream);
-            StringBuilder stringBuilder = new StringBuilder();
-            while (scanner.hasNextLine()) {
-                stringBuilder.append(scanner.nextLine()).append("\n");
-            }
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder documentBuilde = documentBuilderFactory.newDocumentBuilder();
-            Document document = documentBuilde.parse(new ByteArrayInputStream(stringBuilder.toString().getBytes()));
-            return document;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     public void setColumnFieldTypeMapping(ColumnFieldTypeMapping columnFieldTypeMapping) {
         this.columnFieldTypeMapping = columnFieldTypeMapping;
     }
 
-    public void setNameConvert(NameConvert nameConvert) {
-        this.nameConvert = nameConvert;
-    }
 }

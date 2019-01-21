@@ -11,7 +11,6 @@ public class Main {
     public static void main(String[] args) throws SQLException {
         EntityMaker entityMaker = new EntityMaker();
         entityMaker.setColumnFieldTypeMapping(new ColumnFieldTypeMapping());
-        entityMaker.setNameConvert(new NameConvert());
         entityMaker.maker();
     }
 }

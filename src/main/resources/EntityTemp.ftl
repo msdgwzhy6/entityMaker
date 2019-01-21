@@ -12,7 +12,7 @@ import ${import.name};
  * @author hejiaxuan
  */
 </#if>
-@ApiModel("${classDoc}")
+<#--@ApiModel("${classDoc}")-->
 @Table(name = "${tableName}")
 public class ${className} {
 
@@ -25,7 +25,7 @@ public class ${className} {
     <#if idColumnNames?seq_contains(fieldSqlName[key])>
     @Id
     </#if>
-    @ApiModelProperty("${fieldDocStr}")
+    <#--@ApiModelProperty("${fieldDocStr}")-->
     @Column(name = "${fieldSqlName[key]}")
     private ${fields[key].simpleName} ${key};
 

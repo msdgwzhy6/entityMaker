@@ -1,7 +1,10 @@
 <xml>
-    <jdbc.url>jdbc:mysql://127.0.0.1:3306/demo?useSSL=true</jdbc.url>
+    <!--<jdbc.url>jdbc:mysql://172.31.100.71:3306/weibao?characterEncoding=utf8</jdbc.url>-->
+    <!--<jdbc.username>pubmidb</jdbc.username>-->
+    <!--<jdbc.password>Pubmi@2016</jdbc.password>-->
+    <jdbc.url>jdbc:mysql://127.0.0.1:3306/demo1?useSSL=true</jdbc.url>
     <jdbc.username>debian-sys-maint</jdbc.username>
     <jdbc.password>cDjhZo5Tdul66r8E</jdbc.password>
-    <basePath>/home/hjx/work/cloud-demo/ribbon-service/src/main/java</basePath>
-    <entityPackage>top.hejiaxuan.cloud.demo.service.entity</entityPackage>
+    <basePath>/home/hjx/work/pubmi/demo/api/member-api/src/main/java</basePath>
+    <entityPackage>com.pubmi.platform.member.entity</entityPackage>
 </xml>

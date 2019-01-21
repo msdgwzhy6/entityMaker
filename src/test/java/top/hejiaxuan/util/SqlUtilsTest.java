@@ -2,22 +2,30 @@ package top.hejiaxuan.util;
 
 import org.junit.Test;
 
+import java.util.List;
+
 public class SqlUtilsTest {
 
-    public static final String sql = "CREATE TABLE `tbl_accesscore_log` (                                                      \n" +
-            " `ID` char(32) NOT NULL COMMENT '主键',                                                 \n" +
-            " `POLICY_NO` varchar(30) DEFAULT NULL COMMENT '保单号',                                 \n" +
-            " `BEIGIN_TIME` timestamp NULL DEFAULT NULL COMMENT '当前时间',                          \n" +
-            " `RESPONSE_MESSAGE` text COMMENT '响应报文',                                            \n" +
-            " `DIVIDER` char(3) DEFAULT NULL COMMENT '分库标识',                                     \n" +
-            " `REQUEST_MESSAGE` text COMMENT '发送给核心的报文',                                     \n" +
-            " `END_TIME` datetime DEFAULT NULL COMMENT '发送结束时间',                               \n" +
-            " `LOG_STATUS` varchar(10) DEFAULT NULL COMMENT '状态 1:success 0:error',                \n" +
-            " `LOG_TYPE` varchar(3) DEFAULT NULL COMMENT '1: request\\n0: response',                  \n" +
-            " `REQUEST_TYPE` varchar(225) DEFAULT NULL COMMENT '请求类型: 保费计算,核保....的编号',  \n" +
-            " PRIMARY KEY (`ID`)                                                                     \n" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='核心交互日志表'     ";
+    public static final String sql = "CREATE TABLE `user` (                                                            \n" +
+            "  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '用户id',                         \n" +
+            "  `name` varchar(225) DEFAULT NULL COMMENT '用户名',                             \n" +
+            "  `create_date` datetime DEFAULT NULL,                                           \n" +
+            "  `status` int(11) DEFAULT NULL,                                                 \n" +
+            "  `age` int(11) DEFAULT NULL COMMENT '年龄',                                     \n" +
+            "  `mark` varchar(225) DEFAULT NULL,                                              \n" +
+            "  PRIMARY KEY (`id`)                                                             \n" +
+            ") ENGINE=InnoDB AUTO_INCREMENT=2104778081 DEFAULT CHARSET=latin1 COMMENT='用户表'  ";
 
+
+    @Test
+    public void getTableName() {
+        System.out.println(SqlUtils.getTableName(sql));
+    }
+
+    @Test
+    public void getTableComment() {
+        System.out.println(SqlUtils.getTableComment(sql));
+    }
 
     @Test
     public void getId() {
@@ -25,15 +33,14 @@ public class SqlUtilsTest {
     }
 
     @Test
-    public void getCommentType() {
-        String s = "   `BEIGIN_TIME` timestamp NULL DEFAULT NULL COMMENT '当前时间', ";
-        System.out.println(SqlUtils.getColumnType("BEIGIN_TIME", s));
+    public void getColumns() {
+        List<String> columns = SqlUtils.getColumnSqls(sql);
+        for (String oneLine : columns) {
+            System.out.println(oneLine);
+            String columnName = SqlUtils.getByPattern(oneLine, "`(.*)`", 1);
+            String comment = SqlUtils.getByPattern(oneLine, "COMMENT '(.*)'", 1);
+            String columnType = SqlUtils.getByPattern(oneLine, "`" + columnName + "` ([A-Za-z]*)", 1);
+            System.out.printf("名称：%-20s 类型：%-20s 注释：%-20s \n", columnName, columnType, comment);
+        }
     }
-
-    @Test
-    public void byLine() {
-        System.out.println(SqlUtils.byLine(sql));
-    }
-
-
 }

@@ -1,21 +1,25 @@
 package top.hejiaxuan.util;
 
-import freemarker.cache.*;
+import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Scanner;
 
 public class FreeMarkerUtils {
 
+    /**
+     * freemarker工具，
+     *
+     * @param subjectParams
+     * @param templetPath
+     * @return
+     * @throws Exception
+     */
     public static String getJavaClass(Object subjectParams, String templetPath) throws Exception {
         StringTemplateLoader loader = new StringTemplateLoader();
         Scanner scanner = new Scanner(Thread.currentThread().getContextClassLoader().getResourceAsStream(templetPath));
@@ -34,7 +38,6 @@ public class FreeMarkerUtils {
         //处理空值为空字符串
         conf.setClassicCompatible(true);
         Template template = conf.getTemplate(name);
-
         Writer out = new StringWriter(2048);
         template.process(subjectParams, out);
         String javaClass = out.toString();

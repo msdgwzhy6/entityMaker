@@ -2,19 +2,20 @@ package top.hejiaxuan;
 
 /**
  * 字段名称转换
+ * @author hjx
  */
 public class NameConvert {
 
     /**
      * 类名称转换
      *
-     * @param name
+     * @param tableName
      * @return
      */
-    public String entityName(String name) {
-        name = name.toLowerCase();
+    public static String entityName(String tableName) {
+        String lowerCaseName = tableName.toLowerCase();
         StringBuilder newName = new StringBuilder();
-        char[] chars = name.toCharArray();
+        char[] chars = lowerCaseName.toCharArray();
         boolean change = false;
         for (int i = 0; i < chars.length; i++) {
             char aChar = chars[i];
@@ -41,7 +42,7 @@ public class NameConvert {
      * @param name
      * @return
      */
-    public String fieldName(String name) {
+    public static String fieldName(String name) {
         name = name.toLowerCase();
         StringBuilder newName = new StringBuilder();
         char[] chars = name.toCharArray();
