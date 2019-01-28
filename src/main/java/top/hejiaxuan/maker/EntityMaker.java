@@ -60,17 +60,17 @@ public class EntityMaker {
 
     /**
      * 生成entity
+     *
+     * @param imports 需要导入的特殊的class
      */
-    public void maker() {
+    public void maker(Class... imports) {
         List<String> tableNames = showTables();
         for (String tableName : tableNames) {
             String createTableSql = getCreateTableSql(tableName);
             EntityModel entityModel = makeModelBySql(createTableSql);
-//            entityModel.addImport(ApiModel.class);
-//            entityModel.addImport(ApiModelProperty.class);
-            entityModel.addImport(Table.class);
-            entityModel.addImport(Column.class);
-            entityModel.addImport(Id.class);
+            for (Class importClass : imports) {
+                entityModel.addImport(importClass);
+            }
             boolean b = makeOneClass(entityModel);
             System.out.printf("创建class：%-20s %-20s  %s \n", entityModel.getClassDoc(), tableName, b);
             Map<String, Class> fields = entityModel.getFields();
@@ -100,7 +100,7 @@ public class EntityMaker {
         List<String> line = SqlUtils.getColumnSqls(createTableSql);
         for (String oneLine : line) {
             String columnName = SqlUtils.getByPattern(oneLine, "`(.*)`", 1);
-            String comment = SqlUtils.getByPattern(oneLine, "COMMENT '(.*)'", 1);
+            String comment = SqlUtils.getColumnComment(oneLine);
             String columnType = SqlUtils.getByPattern(oneLine, "`" + columnName + "` ([A-Za-z]*)", 1);
             String fieldName = NameConvert.fieldName(columnName);
             Class fieldClass = columnFieldTypeMapping.getFieldType(columnType);

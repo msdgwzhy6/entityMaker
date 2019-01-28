@@ -11,16 +11,6 @@ import java.util.regex.Pattern;
  */
 public class SqlUtils {
 
-    public static List<String> byLine(String sql) {
-        List<String> lines = new ArrayList<>();
-        Scanner scanner = new Scanner(sql);
-        while (scanner.hasNextLine()) {
-            String nextLine = scanner.nextLine();
-            lines.add(nextLine);
-        }
-        return lines;
-    }
-
     /**
      * 获得表的名称
      *
@@ -39,6 +29,21 @@ public class SqlUtils {
      */
     public static String getTableComment(String sql) {
         return getByPattern(sql, "\\) .* COMMENT='(.*)'", 1);
+    }
+
+    /**
+     * 获取字段上的注释
+     *
+     * @param sql
+     * @return
+     */
+    public static String getColumnComment(String sql) {
+        String comment = getByPattern(sql, "COMMENT '(.*)'", 1);
+        if (comment == null) {
+            return null;
+        }
+        //有的注释里有 "/", 为了防止生成的class错误，替换成 " "
+        return comment.replace("/", " ");
     }
 
     /**
