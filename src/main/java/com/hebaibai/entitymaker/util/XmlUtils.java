@@ -1,4 +1,4 @@
-package top.hejiaxuan.util;
+package com.hebaibai.entitymaker.util;
 
 import org.w3c.dom.Document;
 

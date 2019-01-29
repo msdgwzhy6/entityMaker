@@ -1,4 +1,4 @@
-package top.hejiaxuan.util;
+package com.hebaibai.entitymaker.util;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;

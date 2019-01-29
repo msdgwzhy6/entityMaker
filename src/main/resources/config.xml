@@ -2,9 +2,16 @@
     <!--<jdbc.url>jdbc:mysql://172.31.100.71:3306/weibao?characterEncoding=utf8</jdbc.url>-->
     <!--<jdbc.username>pubmidb</jdbc.username>-->
     <!--<jdbc.password>Pubmi@2016</jdbc.password>-->
-    <jdbc.url>jdbc:mysql://127.0.0.1:3306/demo1?useSSL=true</jdbc.url>
-    <jdbc.username>debian-sys-maint</jdbc.username>
-    <jdbc.password>cDjhZo5Tdul66r8E</jdbc.password>
-    <basePath>/home/hjx/work/pubmi/demo/api/member-api/src/main/java</basePath>
-    <entityPackage>com.pubmi.platform.member.entity</entityPackage>
+
+    <!--<jdbc.url>jdbc:mysql://127.0.0.1:3306/demo1?useSSL=true</jdbc.url>-->
+    <!--<jdbc.username>debian-sys-maint</jdbc.username>-->
+    <!--<jdbc.password>cDjhZo5Tdul66r8E</jdbc.password>-->
+
+    <jdbc.url>jdbc:mysql://172.31.100.50:3306/pubmidb?useSSL=true</jdbc.url>
+    <jdbc.username>pubmidb</jdbc.username>
+    <jdbc.password>Pubmi@2016</jdbc.password>
+
+    <basePath>/home/hjx/work/myProjectPlus/web/src/main/java</basePath>
+    <entityPackage>com.hebaibai.demo.web.entity</entityPackage>
+
 </xml>

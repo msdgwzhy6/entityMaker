@@ -1,4 +1,4 @@
-package top.hejiaxuan;
+package com.hebaibai.entitymaker.util;
 
 /**
  * 字段名称转换

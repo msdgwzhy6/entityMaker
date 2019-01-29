@@ -1,8 +1,7 @@
-package top.hejiaxuan;
+package com.hebaibai.entitymaker;
 
 import org.junit.Test;
-
-import static org.junit.Assert.*;
+import com.hebaibai.entitymaker.util.NameConvert;
 
 public class NameConvertTest {
 

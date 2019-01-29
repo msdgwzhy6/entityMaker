@@ -1,4 +1,4 @@
-package top.hejiaxuan.model;
+package com.hebaibai.entitymaker.model;
 
 import java.util.*;
 

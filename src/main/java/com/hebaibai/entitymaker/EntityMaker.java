@@ -1,16 +1,10 @@
-package top.hejiaxuan.maker;
+package com.hebaibai.entitymaker;
 
+import com.hebaibai.entitymaker.model.EntityModel;
+import com.hebaibai.entitymaker.util.*;
 import com.mysql.jdbc.Connection;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import top.hejiaxuan.NameConvert;
-import top.hejiaxuan.model.EntityModel;
-import top.hejiaxuan.util.FileUtils;
-import top.hejiaxuan.util.FreeMarkerUtils;
-import top.hejiaxuan.util.SqlUtils;
-import top.hejiaxuan.util.XmlUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -202,6 +196,23 @@ public class EntityMaker {
 
     public void setColumnFieldTypeMapping(ColumnFieldTypeMapping columnFieldTypeMapping) {
         this.columnFieldTypeMapping = columnFieldTypeMapping;
+    }
+
+
+    /**
+     * 程序入口
+     *
+     * @param args
+     * @throws SQLException
+     */
+    public static void main(String[] args) {
+        EntityMaker entityMaker = new EntityMaker();
+        entityMaker.setColumnFieldTypeMapping(new ColumnFieldTypeMapping());
+        entityMaker.maker(
+                Table.class,
+                Column.class,
+                Id.class
+        );
     }
 
 }

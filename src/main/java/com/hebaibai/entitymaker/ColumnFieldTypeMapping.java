@@ -1,4 +1,4 @@
-package top.hejiaxuan.maker;
+package com.hebaibai.entitymaker;
 
 import java.math.BigDecimal;
 import java.util.Date;
